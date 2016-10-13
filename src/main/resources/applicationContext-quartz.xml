@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- 属性文件读入 -->  
+    <bean id="propertyConfigurer"  
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+        <property name="locations">  
+            <list>  
+                <value>classpath:jdbc.properties</value>  
+            </list>  
+        </property>  
+    </bean> 
+    <!-- 数据源定义,使用c3p0 连接池 -->  
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"  
+        destroy-method="close">  
+        <property name="driverClass" value="${jdbc.driverClassName}" />  
+        <property name="jdbcUrl" value="${jdbc.url}" />  
+        <property name="user" value="${jdbc.username}" />  
+        <property name="password" value="${jdbc.password}" />  
+        <property name="initialPoolSize" value="5" />  
+        <property name="minPoolSize" value="5" />  
+        <property name="maxPoolSize" value="25" />  
+        <property name="acquireIncrement" value="10" />  
+        <property name="maxIdleTime" value="60" />  
+    </bean> 
+    
+	<bean name="quartzScheduler" autowire="no"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="applicationContextSchedulerContextKey" value="applicationContextKey" />
+		<property name="configLocation" value="classpath:quartz.properties" />		
+		<property name="triggers">
+			<list>
+				<ref bean="trigger1" />
+				<ref bean="trigger2" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="jobDetail1" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass">
+			<value>cn.com.nfky.spring_quartz_learning.quartz.cluster.MyQuartzJobBean1</value>
+		</property>	
+		<property name="durability" value="true" />	
+		<!-- 当Quartz服务被中止后，再次启动或集群中其他机器接手任务时会尝试恢复执行之前未完成的所有任务。 -->
+		<property name="requestsRecovery" value="true" />		
+	</bean>
+	<bean id="trigger1" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="jobDetail1" />
+		<property name="cronExpression" value="0/5 * * ? * * *" />
+	</bean>
+
+	<bean id="jobDetail2" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass">
+			<value>cn.com.nfky.spring_quartz_learning.quartz.cluster.MyQuartzJobBean2</value>
+		</property>	
+		<property name="durability" value="true" />	
+		<property name="requestsRecovery" value="true" />		
+	</bean>
+	<bean id="trigger2" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="jobDetail2" />
+		<property name="cronExpression" value="0/10 * * ? * * *" />
+	</bean>	
+
+</beans>

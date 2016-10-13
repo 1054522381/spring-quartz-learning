@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<context:annotation-config />
+	<context:component-scan base-package="cn.com.nfky"></context:component-scan>
+	<!-- 
+	<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+	    <property name="corePoolSize" value="5" />
+	    <property name="maxPoolSize" value="10" />
+	    <property name="queueCapacity" value="25" />
+	</bean>
+	
+	<bean id="taskExecutorExample" class="cn.com.nfky.spring_quartz_learning.TaskExecutorExample">
+	    <constructor-arg ref="taskExecutor" />
+	</bean>
+	 -->
+	 
+	<!-- annotation @Scheduled -->
+	<!-- 
+	<task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
+	<task:executor id="myExecutor" pool-size="5"/>
+	<task:scheduler id="myScheduler" pool-size="10"/>
+	<task:scheduled-tasks scheduler="myScheduler">
+		<task:scheduled ref="sampleBean" method="doSomething" fixed-rate="3000"/>
+	</task:scheduled-tasks>
+	 -->
+	 
+	<!-- quartz -->
+	<bean name="exampleJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+	    <property name="jobClass" value="cn.com.nfky.spring_quartz_learning.quartz.ExampleJob"/>
+	    <property name="jobDataAsMap">
+	        <map>
+	            <entry key="timeout" value="5"/>
+	        </map>
+	    </property>
+	</bean>
+	<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+	    <property name="targetObject" ref="exampleBusinessObject"/>
+	    <property name="targetMethod" value="doIt"/>
+	    <property name="concurrent" value="false"/>
+	</bean>
+	<bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+	    <!-- see the example of method invoking job above -->
+	    <property name="jobDetail" ref="jobDetail"/>
+	    <!-- repeat every 2 seconds -->
+	    <property name="repeatInterval" value="2000"/>
+	</bean>
+	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+	    <property name="jobDetail" ref="exampleJob"/>
+	    <!-- run per 3 seconds -->
+	    <property name="cronExpression" value="0/3 * * * * ? "/>
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+	    <property name="triggers">
+	        <list>
+	            <ref bean="cronTrigger"/>
+	            <!-- <ref bean="simpleTrigger"/> -->
+	        </list>
+	    </property>
+	</bean>
+
+	<import resource="classpath:applicationContext-quartz.xml"/>
+</beans>
