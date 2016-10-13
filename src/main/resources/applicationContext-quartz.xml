@@ -27,7 +27,7 @@
         <property name="maxIdleTime" value="60" />  
     </bean> 
     
-	<bean name="quartzScheduler" autowire="no"
+	<bean name="quartzScheduler"
 		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="dataSource">
 			<ref bean="dataSource" />
@@ -37,7 +37,7 @@
 		<property name="triggers">
 			<list>
 				<ref bean="trigger1" />
-				<ref bean="trigger2" />
+				<!-- <ref bean="trigger2" /> -->
 			</list>
 		</property>
 	</bean>
