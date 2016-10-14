@@ -52,7 +52,9 @@
 	</bean>
 	<bean id="trigger1" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="jobDetail1" />
-		<property name="cronExpression" value="0/5 * * ? * * *" />
+		<property name="cronExpression" value="0/20 * * ? * * *" />
+		<!-- misfire策略 -->
+		<property name="misfireInstruction" value="2" />
 	</bean>
 
 	<bean id="jobDetail2" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
